@@ -1,0 +1,20 @@
+{
+  "name": "QuickCalc",
+  "short_name": "QuickCalc",
+  "description": "En snabb och enkel kalkylator för iPhone.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b0b0f",
+  "theme_color": "#0b0b0f",
+  "orientation": "portrait",
+  "lang": "sv-SE",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
