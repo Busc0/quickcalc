@@ -4,28 +4,38 @@
 
 :root {
   color-scheme: dark;
+
   --bg: #0b0b0f;
   --card: #15151b;
   --input: #202027;
   --text: #f7f7f8;
   --muted: #9898a3;
   --border: #292932;
+
   --accent: #ffffff;
   --accent-text: #0b0b0f;
-  --shadow: 0 18px 50px rgba(0,0,0,.25);
+
+  --danger: #ff5f57;
+
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.25);
 }
 
 :root.light {
   color-scheme: light;
+
   --bg: #f3f3f5;
   --card: #ffffff;
   --input: #f0f0f3;
   --text: #111116;
   --muted: #6d6d78;
   --border: #dedee5;
+
   --accent: #111116;
   --accent-text: #ffffff;
-  --shadow: 0 18px 50px rgba(0,0,0,.08);
+
+  --danger: #ff3b30;
+
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.08);
 }
 
 html,
@@ -38,9 +48,19 @@ body {
   min-height: 100vh;
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
-    "Segoe UI", sans-serif;
+
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "SF Pro Display",
+    "SF Pro Text",
+    "Segoe UI",
+    sans-serif;
+
   -webkit-font-smoothing: antialiased;
+  transition:
+    background 0.25s ease,
+    color 0.25s ease;
 }
 
 button,
@@ -50,60 +70,99 @@ input {
 
 button {
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
+
+button:active {
+  transform: scale(0.96);
+}
+
+/* -------------------------
+   App
+------------------------- */
 
 .app {
   width: min(100%, 620px);
   margin: 0 auto;
-  padding: max(24px, env(safe-area-inset-top))
+
+  padding:
+    max(24px, env(safe-area-inset-top))
     18px
     max(30px, env(safe-area-inset-bottom));
 }
+
+/* -------------------------
+   Header
+------------------------- */
 
 .topbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
+
   margin: 8px 0 22px;
 }
 
 .eyebrow {
   margin: 0 0 5px;
+
   color: var(--muted);
+
   font-size: 11px;
   font-weight: 800;
-  letter-spacing: .18em;
+
+  letter-spacing: 0.18em;
 }
 
 h1 {
   margin: 0;
-  font-size: clamp(27px, 7vw, 38px);
-  letter-spacing: -.04em;
-}
 
-.icon-btn,
-.operator,
-.text-btn {
-  border: 0;
-  cursor: pointer;
-  color: var(--text);
-  background: transparent;
+  font-size: clamp(27px, 7vw, 38px);
+  line-height: 1;
+
+  letter-spacing: -0.04em;
 }
 
 .icon-btn {
   width: 46px;
   height: 46px;
+
   border: 1px solid var(--border);
   border-radius: 50%;
+
+  background: var(--card);
+  color: var(--text);
+
   font-size: 20px;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    background 0.25s ease,
+    border-color 0.25s ease;
 }
+
+/* -------------------------
+   Cards
+------------------------- */
 
 .card {
   background: var(--card);
+
   border: 1px solid var(--border);
   border-radius: 24px;
+
   box-shadow: var(--shadow);
+
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease;
 }
+
+/* -------------------------
+   Calculator
+------------------------- */
 
 .calculator {
   padding: 20px;
@@ -111,8 +170,11 @@ h1 {
 
 label {
   display: block;
+
   margin: 2px 0 8px;
+
   color: var(--muted);
+
   font-size: 13px;
   font-weight: 600;
 }
@@ -120,32 +182,69 @@ label {
 input {
   width: 100%;
   min-height: 58px;
+
   border: 1px solid var(--border);
   border-radius: 16px;
+
   outline: none;
+
   background: var(--input);
   color: var(--text);
+
   padding: 0 16px;
+
   font-size: 22px;
+
+  transition:
+    border-color 0.2s ease,
+    transform 0.15s ease,
+    background 0.25s ease;
 }
 
 input:focus {
   border-color: var(--muted);
+
+  transform: translateY(-1px);
 }
+
+input::placeholder {
+  color: var(--muted);
+  opacity: 0.65;
+}
+
+/* -------------------------
+   Operators
+------------------------- */
 
 .operators {
   display: grid;
+
   grid-template-columns: repeat(4, 1fr);
+
   gap: 9px;
+
   margin: 14px 0;
 }
 
 .operator {
   min-height: 52px;
+
   border-radius: 15px;
+
   background: var(--input);
+
   border: 1px solid var(--border);
+
+  color: var(--text);
+
   font-size: 24px;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.12s ease,
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
 .operator.active {
@@ -153,37 +252,82 @@ input:focus {
   color: var(--accent-text);
 }
 
+/* -------------------------
+   Calculate
+------------------------- */
+
 .calculate {
   width: 100%;
   min-height: 58px;
+
   margin-top: 16px;
+
   border: 0;
   border-radius: 17px;
+
   background: var(--accent);
   color: var(--accent-text);
-  font-weight: 800;
-  cursor: pointer;
+
   font-size: 17px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.12s ease,
+    opacity 0.2s ease;
 }
+
+.calculate:hover {
+  opacity: 0.92;
+}
+
+/* -------------------------
+   Result
+------------------------- */
 
 .result {
   display: flex;
+
   justify-content: space-between;
   align-items: baseline;
+
   gap: 15px;
+
   padding: 20px 4px 4px;
 }
 
 .result span {
   color: var(--muted);
+
   font-size: 14px;
 }
 
 .result strong {
   font-size: clamp(30px, 8vw, 44px);
-  letter-spacing: -.04em;
+
+  letter-spacing: -0.04em;
+
   overflow-wrap: anywhere;
+
+  animation: resultAppear 0.2s ease;
 }
+
+@keyframes resultAppear {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* -------------------------
+   History
+------------------------- */
 
 .history {
   margin-top: 16px;
@@ -192,19 +336,34 @@ input:focus {
 
 .section-head {
   display: flex;
+
   justify-content: space-between;
   align-items: center;
 }
 
 h2 {
   margin: 0;
+
   font-size: 18px;
+
+  letter-spacing: -0.02em;
 }
 
 .text-btn {
+  border: 0;
+
+  background: transparent;
+
   color: var(--muted);
+
   font-size: 13px;
   font-weight: 700;
+
+  cursor: pointer;
+}
+
+.text-btn:active {
+  transform: scale(0.95);
 }
 
 .history-list {
@@ -213,29 +372,178 @@ h2 {
 
 .empty {
   color: var(--muted);
+
   font-size: 14px;
+
   padding: 10px 0;
+
+  text-align: center;
 }
+
+/* -------------------------
+   History item
+------------------------- */
 
 .history-item {
   display: flex;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 14px 0;
+
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 8px 0;
+
   border-bottom: 1px solid var(--border);
+
+  animation: historyAppear 0.2s ease;
 }
 
 .history-item:last-child {
   border-bottom: 0;
 }
 
+@keyframes historyAppear {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.history-main {
+  flex: 1;
+
+  min-width: 0;
+
+  display: flex;
+
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 14px;
+
+  padding: 10px;
+
+  border: 0;
+  border-radius: 13px;
+
+  background: transparent;
+
+  color: var(--text);
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    transform 0.12s ease;
+}
+
+.history-main:hover {
+  background: var(--input);
+}
+
+.history-main:active {
+  transform: scale(0.98);
+}
+
 .expression {
   color: var(--muted);
+
+  font-size: 15px;
+
+  white-space: nowrap;
 }
 
 .history-result {
+  font-size: 17px;
   font-weight: 800;
+
+  overflow-wrap: anywhere;
 }
+
+.delete-history {
+  flex: 0 0 38px;
+
+  width: 38px;
+  height: 38px;
+
+  border: 0;
+  border-radius: 12px;
+
+  background: transparent;
+
+  color: var(--muted);
+
+  font-size: 22px;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.12s ease;
+}
+
+.delete-history:hover {
+  background: var(--input);
+  color: var(--danger);
+}
+
+.delete-history:active {
+  transform: scale(0.9);
+}
+
+/* -------------------------
+   Toast
+------------------------- */
+
+.toast {
+  position: fixed;
+
+  left: 50%;
+
+  bottom: max(24px, env(safe-area-inset-bottom));
+
+  transform: translate(-50%, 20px);
+
+  padding: 11px 16px;
+
+  border-radius: 999px;
+
+  background: var(--accent);
+  color: var(--accent-text);
+
+  font-size: 14px;
+  font-weight: 700;
+
+  box-shadow: var(--shadow);
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+
+  z-index: 100;
+}
+
+.toast.show {
+  opacity: 1;
+
+  transform: translate(-50%, 0);
+}
+
+/* -------------------------
+   iPhone
+------------------------- */
 
 @media (max-width: 380px) {
   .app {
@@ -246,5 +554,27 @@ h2 {
   .calculator,
   .history {
     padding: 16px;
+  }
+
+  .operator {
+    min-height: 48px;
+  }
+
+  .history-result {
+    font-size: 16px;
+  }
+}
+
+/* -------------------------
+   Reduced motion
+------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
