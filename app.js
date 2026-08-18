@@ -1,294 +1,501 @@
-const first = document.getElementById("first");
-const second = document.getElementById("second");
-const calculate = document.getElementById("calculate");
-const resultValue = document.querySelector("#result strong");
-const historyList = document.getElementById("historyList");
-const clearHistory = document.getElementById("clearHistory");
-const themeToggle = document.getElementById("themeToggle");
-const operators = document.querySelectorAll(".operator");
+const displayValue =
+  document.getElementById("displayValue");
 
-let selectedOp = "+";
+const expression =
+  document.getElementById("expression");
+
+const calculate =
+  document.getElementById("calculate");
+
+const clear =
+  document.getElementById("clear");
+
+const historyList =
+  document.getElementById("historyList");
+
+const clearHistory =
+  document.getElementById("clearHistory");
+
+const themeToggle =
+  document.getElementById("themeToggle");
+
+const numberButtons =
+  document.querySelectorAll(".number");
+
+const operatorButtons =
+  document.querySelectorAll(".operator");
+
+
+let currentValue = "0";
+let firstValue = null;
+let selectedOperator = null;
+let waitingForSecondValue = false;
+
 
 let history = JSON.parse(
   localStorage.getItem("quickcalc-history") || "[]"
 );
 
+
 // -------------------------
-// Räknesätt
+// Display
 // -------------------------
 
-operators.forEach((button) => {
+function updateDisplay() {
+
+  displayValue.textContent = currentValue;
+
+}
+
+
+// -------------------------
+// Numbers
+// -------------------------
+
+numberButtons.forEach((button) => {
+
   button.addEventListener("click", () => {
-    operators.forEach((b) => b.classList.remove("active"));
+
+    const number =
+      button.dataset.number;
+
+
+    if (waitingForSecondValue) {
+
+      currentValue =
+        number === "."
+          ? "0."
+          : number;
+
+      waitingForSecondValue = false;
+
+    } else {
+
+      if (number === "." &&
+          currentValue.includes(".")) {
+
+        return;
+
+      }
+
+
+      if (currentValue === "0" &&
+          number !== ".") {
+
+        currentValue = number;
+
+      } else {
+
+        currentValue += number;
+
+      }
+
+    }
+
+
+    updateDisplay();
+
+
+    if (navigator.vibrate) {
+
+      navigator.vibrate(6);
+
+    }
+
+  });
+
+});
+
+
+// -------------------------
+// Operators
+// -------------------------
+
+operatorButtons.forEach((button) => {
+
+  button.addEventListener("click", () => {
+
+    const inputValue =
+      Number(currentValue);
+
+
+    if (firstValue === null) {
+
+      firstValue = inputValue;
+
+    } else if (selectedOperator) {
+
+      const result =
+        calculateResult(
+          firstValue,
+          inputValue,
+          selectedOperator
+        );
+
+      if (result === null) {
+
+        currentValue = "Fel";
+        updateDisplay();
+
+        return;
+
+      }
+
+
+      firstValue = result;
+
+      currentValue =
+        formatNumber(result);
+
+    }
+
+
+    selectedOperator =
+      button.dataset.op;
+
+    waitingForSecondValue = true;
+
+
+    expression.textContent =
+      `${formatNumber(firstValue)} ${operatorSymbol(selectedOperator)}`;
+
+
+    operatorButtons.forEach((b) => {
+
+      b.classList.remove("active");
+
+    });
+
 
     button.classList.add("active");
 
-    selectedOp = button.dataset.op;
 
-    // Liten haptisk feedback på iPhone
+    updateDisplay();
+
+
     if (navigator.vibrate) {
+
       navigator.vibrate(8);
+
     }
+
   });
+
 });
 
-// -------------------------
-// Hjälpfunktioner
-// -------------------------
-
-function formatNumber(value) {
-  return Number.isInteger(value)
-    ? String(value)
-    : Number(value.toFixed(8)).toString();
-}
-
-function calculateResult(a, b, op) {
-  switch (op) {
-    case "+":
-      return a + b;
-
-    case "-":
-      return a - b;
-
-    case "*":
-      return a * b;
-
-    case "/":
-      return b === 0 ? null : a / b;
-
-    default:
-      return null;
-  }
-}
-
-function operatorSymbol(op) {
-  return {
-    "+": "+",
-    "-": "−",
-    "*": "×",
-    "/": "÷",
-  }[op];
-}
 
 // -------------------------
-// Toast
+// Calculate
 // -------------------------
 
-function showToast(message) {
-  let toast = document.getElementById("toast");
+calculate.addEventListener("click", () => {
 
-  if (!toast) {
-    toast = document.createElement("div");
-    toast.id = "toast";
-    toast.className = "toast";
-    document.body.appendChild(toast);
-  }
-
-  toast.textContent = message;
-  toast.classList.add("show");
-
-  setTimeout(() => {
-    toast.classList.remove("show");
-  }, 1800);
-}
-
-// -------------------------
-// Historik
-// -------------------------
-
-function renderHistory() {
-  if (!history.length) {
-    historyList.innerHTML =
-      '<p class="empty">Dina senaste beräkningar visas här.</p>';
+  if (
+    firstValue === null ||
+    selectedOperator === null
+  ) {
 
     return;
+
   }
 
-  historyList.innerHTML = history
-    .map(
-      (item, index) => `
-        <div class="history-item" data-index="${index}">
-          <button
-            class="history-main"
-            type="button"
-            aria-label="Använd ${item.a} ${operatorSymbol(item.op)} ${item.b}"
-          >
-            <span class="expression">
-              ${item.a} ${operatorSymbol(item.op)} ${item.b}
-            </span>
 
-            <span class="history-result">
-              ${item.result}
-            </span>
-          </button>
+  const secondValue =
+    Number(currentValue);
 
-          <button
-            class="delete-history"
-            type="button"
-            data-delete="${index}"
-            aria-label="Ta bort beräkning"
-          >
-            ×
-          </button>
-        </div>
-      `
-    )
-    .join("");
 
-  // Klick på historik → återanvänd beräkningen
-  document.querySelectorAll(".history-main").forEach((button) => {
-    button.addEventListener("click", () => {
-      const item = history[
-        Number(button.closest(".history-item").dataset.index)
-      ];
+  const result =
+    calculateResult(
+      firstValue,
+      secondValue,
+      selectedOperator
+    );
 
-      first.value = item.a;
-      second.value = item.b;
 
-      selectedOp = item.op;
+  if (result === null) {
 
-      operators.forEach((operator) => {
-        operator.classList.toggle(
-          "active",
-          operator.dataset.op === selectedOp
-        );
-      });
+    currentValue = "Kan inte dela med 0";
 
-      resultValue.textContent = item.result;
+    updateDisplay();
 
-      showToast("Beräkning återanvänd");
-    });
+    return;
+
+  }
+
+
+  const formatted =
+    formatNumber(result);
+
+
+  expression.textContent =
+    `${formatNumber(firstValue)} ${operatorSymbol(selectedOperator)} ${formatNumber(secondValue)} =`;
+
+
+  currentValue =
+    formatted;
+
+
+  history.unshift({
+
+    a: formatNumber(firstValue),
+
+    b: formatNumber(secondValue),
+
+    op: selectedOperator,
+
+    result: formatted
+
   });
 
-  // Ta bort enskild historikpost
-  document.querySelectorAll(".delete-history").forEach((button) => {
-    button.addEventListener("click", (event) => {
-      event.stopPropagation();
 
-      const index = Number(button.dataset.delete);
+  history =
+    history.slice(0, 10);
 
-      history.splice(index, 1);
 
-      saveHistory();
-      renderHistory();
-
-      showToast("Borttagen");
-    });
-  });
-}
-
-function saveHistory() {
   localStorage.setItem(
     "quickcalc-history",
     JSON.stringify(history)
   );
-}
 
-// -------------------------
-// Beräkna
-// -------------------------
 
-function performCalculation() {
-  const a = Number(first.value);
-  const b = Number(second.value);
+  firstValue = null;
 
-  if (first.value === "" || second.value === "") {
-    resultValue.textContent = "Fyll i båda";
-    showToast("Fyll i båda talen");
-    return;
-  }
+  selectedOperator = null;
 
-  const result = calculateResult(a, b, selectedOp);
+  waitingForSecondValue = true;
 
-  if (result === null) {
-    resultValue.textContent = "Kan inte dela med 0";
-    showToast("Kan inte dela med 0");
-    return;
-  }
 
-  const formatted = formatNumber(result);
+  operatorButtons.forEach((button) => {
 
-  resultValue.textContent = formatted;
+    button.classList.remove("active");
 
-  history.unshift({
-    a: formatNumber(a),
-    b: formatNumber(b),
-    op: selectedOp,
-    result: formatted,
   });
 
-  // Behåll max 10 beräkningar
-  history = history.slice(0, 10);
 
-  saveHistory();
   renderHistory();
+
 
   if (navigator.vibrate) {
+
     navigator.vibrate(12);
+
   }
+
+});
+
+
+// -------------------------
+// Clear
+// -------------------------
+
+clear.addEventListener("click", () => {
+
+  currentValue = "0";
+
+  firstValue = null;
+
+  selectedOperator = null;
+
+  waitingForSecondValue = false;
+
+  expression.textContent = "";
+
+
+  operatorButtons.forEach((button) => {
+
+    button.classList.remove("active");
+
+  });
+
+
+  updateDisplay();
+
+
+  if (navigator.vibrate) {
+
+    navigator.vibrate(8);
+
+  }
+
+});
+
+
+// -------------------------
+// Calculation
+// -------------------------
+
+function calculateResult(a, b, op) {
+
+  switch (op) {
+
+    case "+":
+
+      return a + b;
+
+    case "-":
+
+      return a - b;
+
+    case "*":
+
+      return a * b;
+
+    case "/":
+
+      return b === 0
+        ? null
+        : a / b;
+
+    default:
+
+      return null;
+
+  }
+
 }
 
-calculate.addEventListener("click", performCalculation);
-
-// Enter på tangentbordet
-[first, second].forEach((input) => {
-  input.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      performCalculation();
-    }
-  });
-});
 
 // -------------------------
-// Rensa historik
+// Formatting
 // -------------------------
 
-clearHistory.addEventListener("click", () => {
+function formatNumber(value) {
+
+  return Number.isInteger(value)
+
+    ? String(value)
+
+    : Number(value.toFixed(8)).toString();
+
+}
+
+
+function operatorSymbol(op) {
+
+  return {
+
+    "+": "+",
+
+    "-": "−",
+
+    "*": "×",
+
+    "/": "÷"
+
+  }[op];
+
+}
+
+
+// -------------------------
+// History
+// -------------------------
+
+function renderHistory() {
+
   if (!history.length) {
-    showToast("Historiken är redan tom");
+
+    historyList.innerHTML =
+      '<p class="empty">Dina senaste beräkningar visas här.</p>';
+
     return;
+
   }
 
-  history = [];
 
-  localStorage.removeItem("quickcalc-history");
+  historyList.innerHTML =
+    history.map((item) => `
 
-  renderHistory();
+      <div class="history-item">
 
-  showToast("Historiken rensad");
-});
+        <span class="expression">
+
+          ${item.a}
+          ${operatorSymbol(item.op)}
+          ${item.b}
+
+        </span>
+
+        <strong>
+
+          ${item.result}
+
+        </strong>
+
+      </div>
+
+    `).join("");
+
+}
+
 
 // -------------------------
-// Dark / Light mode
+// Theme
 // -------------------------
 
 themeToggle.addEventListener("click", () => {
+
   document.documentElement.classList.toggle("light");
+
 
   const light =
     document.documentElement.classList.contains("light");
 
+
   localStorage.setItem(
+
     "quickcalc-theme",
-    light ? "light" : "dark"
+
+    light
+      ? "light"
+      : "dark"
+
   );
 
-  themeToggle.textContent = light ? "☾" : "☀︎";
 
-  if (navigator.vibrate) {
-    navigator.vibrate(8);
-  }
+  themeToggle.textContent =
+    light ? "☾" : "☀︎";
+
 });
 
-// Ladda sparat tema
-if (localStorage.getItem("quickcalc-theme") === "light") {
+
+// -------------------------
+// Clear history
+// -------------------------
+
+clearHistory.addEventListener("click", () => {
+
+  history = [];
+
+  localStorage.removeItem(
+    "quickcalc-history"
+  );
+
+  renderHistory();
+
+});
+
+
+// -------------------------
+// Load theme
+// -------------------------
+
+if (
+  localStorage.getItem("quickcalc-theme")
+  === "light"
+) {
+
   document.documentElement.classList.add("light");
 
   themeToggle.textContent = "☾";
+
 }
+
 
 // -------------------------
 // Start
 // -------------------------
+
+updateDisplay();
 
 renderHistory();
